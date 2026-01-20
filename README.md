@@ -6,6 +6,13 @@ Interactive web-based study tool for preparing for the Snowflake Pro Core Certif
 
 ## Getting Started
 
+### Clone the Repository
+
+```bash
+git clone https://github.com/taylorsegell/snowcore.git
+cd snowcore
+```
+
 ### Prerequisites
 - Python 3.7 or higher
 - pip
