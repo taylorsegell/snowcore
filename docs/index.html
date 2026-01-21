@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Snowflake Practice Tests</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <button id="back-to-landing" class="ghost back-btn" style="display: none;">← Back to tests</button>
+      <h1>Snowflake Practice Tests</h1>
+      <p class="muted">Offline-friendly, progress saved locally</p>
+    </div>
+    <div class="controls">
+      <label>
+        <select id="test-filter"></select>
+      </label>
+      <label class="toggle">
+        <input type="checkbox" id="review-toggle" />
+        <span>Review mistakes only</span>
+      </label>
+      <button id="export-mistakes" class="ghost">Export mistakes CSV</button>
+      <button id="reset-progress" class="ghost">Reset progress</button>
+    </div>
+  </header>
+
+  <section id="landing" class="card">
+    <div class="card-top">
+      <div class="badge">Pick a test</div>
+      <div class="muted">Start anywhere, progress is saved</div>
+    </div>
+    <div id="landing-grid" class="landing-grid"></div>
+  </section>
+
+  <main id="quiz-view" class="hidden">
+    <section class="stats">
+      <div><span id="stat-attempted">0</span><small>Attempted</small></div>
+      <div><span id="stat-correct">0</span><small>Correct</small></div>
+      <div><span id="stat-incorrect">0</span><small>Incorrect</small></div>
+      <div><span id="stat-streak">0</span><small>Streak</small></div>
+      <div><span id="stat-total-attempts">0</span><small>Total Attempts</small></div>
+    </section>
+
+    <section class="card">
+      <div class="card-top">
+        <div class="badge">Question Overview</div>
+        <div class="muted">Click to jump • Green = correct first try • Red = incorrect</div>
+      </div>
+      <div id="question-grid" class="question-grid"></div>
+    </section>
+
+    <div class="progress">
+      <div id="progress-bar"></div>
+      <div class="progress-label" id="progress-label">0 / 0</div>
+    </div>
+
+    <section id="question-card" class="card">
+      <div class="card-top">
+        <div class="badge" id="question-meta">Loading…</div>
+        <div class="test-pill" id="test-pill"></div>
+      </div>
+      <h2 id="question-text">Loading question…</h2>
+      <form id="options"></form>
+      <div class="actions">
+        <button type="button" id="prev">Previous</button>
+        <button type="button" id="check">Check answer</button>
+        <button type="button" id="next">Next</button>
+        <button type="button" id="retry" class="ghost">Retry</button>
+      </div>
+      <div id="feedback" class="feedback"></div>
+      <div id="explanation" class="explanation"></div>
+    </section>
+  </main>
+
+  <script src="questions-data.js"></script>
+  <script type="module" src="app.js"></script>
+</body>
+</html>
