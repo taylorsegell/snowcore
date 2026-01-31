@@ -291,6 +291,75 @@ main { max-width: 920px; margin: 24px auto; display: flex; flex-direction: colum
 .explanation { color: var(--muted); font-size: 14px; line-height: 1.5; }
 .explanation a { color: var(--accent); }
 
+/* Markdown styling for questions, options, and explanations */
+#question-text code,
+.option code,
+.explanation code {
+  background: rgba(116, 193, 194, 0.15);
+  color: var(--accent);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
+  font-size: 0.9em;
+}
+
+#question-text pre,
+.explanation pre {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px;
+  overflow-x: auto;
+  margin: 12px 0;
+}
+
+#question-text pre code,
+.explanation pre code {
+  background: none;
+  padding: 0;
+  color: var(--text);
+}
+
+#question-text ul,
+#question-text ol,
+.explanation ul,
+.explanation ol {
+  margin: 8px 0;
+  padding-left: 24px;
+}
+
+#question-text li,
+.explanation li {
+  margin: 4px 0;
+  line-height: 1.6;
+}
+
+#question-text p,
+.explanation p {
+  margin: 8px 0;
+}
+
+#question-text p:first-child {
+  margin-top: 0;
+}
+
+#question-text p:last-child,
+.explanation p:last-child {
+  margin-bottom: 0;
+}
+
+#question-text strong,
+.explanation strong {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+#question-text em,
+.explanation em {
+  color: var(--accent-2);
+  font-style: italic;
+}
+
 .muted { color: var(--muted); font-size: 14px; margin-top: 4px; }
 
 @media (max-width: 720px) {

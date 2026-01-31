@@ -57,12 +57,12 @@ async function loadQuestions() {
 }
 
 function buildFilter(items) {
-  const tests = Array.from(new Set(items.map((q) => q.testNumber).filter(Boolean))).sort((a, b) => a - b);
+  const tests = Array.from(new Set(items.map((q) => q.testNumber).filter((t) => t !== null && t !== undefined))).sort((a, b) => a - b);
   els.testFilter.innerHTML = ['<option value="all">All tests</option>', ...tests.map((t) => `<option value="${t}">Test ${t}</option>`)].join('');
 }
 
 function buildLanding(items) {
-  const tests = Array.from(new Set(items.map((q) => q.testNumber).filter(Boolean))).sort((a, b) => a - b);
+  const tests = Array.from(new Set(items.map((q) => q.testNumber).filter((t) => t !== null && t !== undefined))).sort((a, b) => a - b);
   const total = items.length;
   const perTest = tests.map((t) => {
     const subset = items.filter((q) => q.testNumber === t);
@@ -198,8 +198,9 @@ function render() {
   const attemptCount = attempt?.count || 0;
   const attemptText = attemptCount > 0 ? ` • ${attemptCount} attempt${attemptCount > 1 ? 's' : ''}` : '';
   els.questionMeta.textContent = `Question ${currentIndex + 1} of ${filtered.length}${attemptText}`;
-  els.testPill.textContent = q.testNumber ? `Test ${q.testNumber} • ${q.source}` : q.source;
-  els.questionText.textContent = q.question;
+  const hasTest = q.testNumber !== null && q.testNumber !== undefined;
+  els.testPill.textContent = hasTest ? `Test ${q.testNumber} • ${q.source}` : q.source;
+  els.questionText.innerHTML = marked.parse(q.question);
 
   const isMulti = q.answers.length > 1;
   els.options.innerHTML = q.options
@@ -209,7 +210,7 @@ function render() {
       return `
         <label class="option" data-id="${opt.id}">
           <input type="${inputType}" name="choice" value="${opt.id}" ${checked} />
-          <span>${opt.value}</span>
+          <span>${marked.parseInline(opt.value)}</span>
         </label>`;
     })
     .join('');
@@ -334,8 +335,9 @@ function showFeedback(q, correct) {
   els.feedback.textContent = correct ? 'Correct!' : 'Not quite—try again or check explanation.';
   els.feedback.className = `feedback ${correct ? 'ok' : 'no'}`;
   if (q.explanation || q.reference) {
-    const link = q.reference ? `<a href="${q.reference}" target="_blank" rel="noreferrer">Reference</a>` : '';
-    els.explanation.innerHTML = `${q.explanation || ''} ${link}`;
+    const link = q.reference ? `<a href="${q.reference}" target="_blank" rel=\"noreferrer\">Reference</a>` : '';
+    const parsedExplanation = q.explanation ? marked.parse(q.explanation) : '';
+    els.explanation.innerHTML = `${parsedExplanation} ${link}`;
   } else {
     els.explanation.textContent = '';
   }
@@ -442,7 +444,7 @@ function exportMistakesCSV() {
       escapeCSV(q.explanation),
       q.reference,
       q.source,
-      q.testNumber || '',
+      q.testNumber ?? '',
     ];
   });
 
