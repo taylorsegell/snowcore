@@ -1,1 +1,9 @@
 /.DS_Store
+/node_modules
+
+*.bak.*
+convert_new.py
+fix.py
+docs/new.csv
+NEW.JS
+formatted_questions.json

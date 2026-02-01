@@ -4,6 +4,23 @@ Interactive web-based study tool for preparing for the Snowflake Pro Core Certif
 
 ![assets/screen-recording.gif](assets/screen-recording.gif)
 
+## 🚀 Quick Start Options
+
+### Option 1: GitHub Pages (No Setup Required)
+
+**Deploy to GitHub Pages for free hosting:**
+
+This repo includes a static version in the `docs/` folder that works without any backend.
+
+1. Push to GitHub
+2. Enable GitHub Pages in Settings → Pages
+3. Select `main` branch and `/docs` folder
+4. Your site will be live at `https://your-username.github.io/snowcore/`
+
+See [docs/README.md](docs/README.md) for detailed deployment instructions.
+
+### Option 2: Run Locally with Python
+
 ## Getting Started
 
 ### Clone the Repository
