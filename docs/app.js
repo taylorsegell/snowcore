@@ -12,7 +12,9 @@ const els = {
   gridCollapseToggle: document.getElementById('grid-collapse-toggle'),
   testFilter: document.getElementById('test-filter'),
   reviewToggle: document.getElementById('review-toggle'),
+  flaggedToggle: document.getElementById('flagged-toggle'),
   exportMistakes: document.getElementById('export-mistakes'),
+  exportFlagged: document.getElementById('export-flagged'),
   reset: document.getElementById('reset-progress'),
   progressBar: document.getElementById('progress-bar'),
   progressLabel: document.getElementById('progress-label'),
@@ -26,6 +28,8 @@ const els = {
   next: document.getElementById('next'),
   check: document.getElementById('check'),
   retry: document.getElementById('retry'),
+  flagReview: document.getElementById('flag-review'),
+  flagBroken: document.getElementById('flag-broken'),
   statAttempted: document.getElementById('stat-attempted'),
   statCorrect: document.getElementById('stat-correct'),
   statIncorrect: document.getElementById('stat-incorrect'),
@@ -90,17 +94,29 @@ function buildLanding(items) {
 function applyFilter() {
   const choice = selectedTest ?? els.testFilter.value;
   const reviewOnly = els.reviewToggle.checked;
+  const flaggedOnly = els.flaggedToggle.checked;
 
   filtered = questions.filter((q) => {
     const matchesTest = choice === 'all' ? true : q.testNumber === Number(choice);
     if (!matchesTest) return false;
+
+    if (flaggedOnly) {
+      const flags = state.flags[q.id];
+      return flags && (flags.review || flags.broken);
+    }
+
     if (!reviewOnly) return true;
     const attempt = state.attempts[q.id];
     return attempt && attempt.status === 'incorrect';
   });
 
   if (filtered.length === 0) {
-    els.questionText.textContent = reviewOnly ? 'No incorrect questions to review.' : 'No questions found. Pick a test above or return to landing.';
+    const msg = flaggedOnly
+      ? 'No flagged questions found.'
+      : reviewOnly
+      ? 'No incorrect questions to review.'
+      : 'No questions found. Pick a test above or return to landing.';
+    els.questionText.textContent = msg;
     els.options.innerHTML = '';
     els.feedback.textContent = '';
     els.explanation.textContent = '';
@@ -123,13 +139,23 @@ function wireEvents() {
     selectedTest = els.testFilter.value === 'all' ? 'all' : Number(els.testFilter.value);
     applyFilter();
   });
-  els.reviewToggle.addEventListener('change', () => applyFilter());
+  els.reviewToggle.addEventListener('change', () => {
+    if (els.reviewToggle.checked) els.flaggedToggle.checked = false;
+    applyFilter();
+  });
+  els.flaggedToggle.addEventListener('change', () => {
+    if (els.flaggedToggle.checked) els.reviewToggle.checked = false;
+    applyFilter();
+  });
   els.exportMistakes.addEventListener('click', exportMistakesCSV);
+  els.exportFlagged.addEventListener('click', exportFlaggedCSV);
   els.reset.addEventListener('click', resetProgress);
   els.prev.addEventListener('click', () => move(-1));
   els.next.addEventListener('click', () => move(1));
   els.check.addEventListener('click', gradeCurrent);
   els.retry.addEventListener('click', retryCurrent);
+  els.flagReview.addEventListener('click', () => toggleFlag('review'));
+  els.flagBroken.addEventListener('click', () => toggleFlag('broken'));
 
   // Question grid collapse/expand
   if (els.questionOverviewHeader && els.gridCollapseToggle) {
@@ -203,7 +229,9 @@ function buildQuestionGrid() {
   els.questionGrid.innerHTML = filtered
     .map((q, idx) => {
       const attempt = state.attempts[q.id];
+      const flags = state.flags[q.id] || {};
       let btnClass = '';
+
       if (attempt) {
         if (attempt.status === 'correct' && attempt.count === 1) {
           btnClass = 'correct-first';
@@ -211,6 +239,10 @@ function buildQuestionGrid() {
           btnClass = 'incorrect';
         }
       }
+
+      if (flags.review) btnClass += ' flagged-review';
+      if (flags.broken) btnClass += ' flagged-broken';
+
       return `<button class="${btnClass}" data-index="${idx}">${idx + 1}</button>`;
     })
     .join('');
@@ -243,6 +275,7 @@ function render() {
   if (!filtered.length) return;
   const q = filtered[currentIndex];
   const attempt = state.attempts[q.id];
+  const flags = state.flags[q.id] || {};
 
   const attemptCount = attempt?.count || 0;
   const attemptText = attemptCount > 0 ? ` • ${attemptCount} attempt${attemptCount > 1 ? 's' : ''}` : '';
@@ -268,6 +301,10 @@ function render() {
   els.feedback.className = 'feedback';
   els.explanation.textContent = '';
   els.retry.disabled = !attempt;
+
+  // Update flag button states
+  els.flagReview.classList.toggle('active', flags.review || false);
+  els.flagBroken.classList.toggle('active', flags.broken || false);
 
   if (attempt) {
     showFeedback(q, attempt.status === 'correct');
@@ -363,6 +400,26 @@ function retryCurrent() {
   render();
 }
 
+function toggleFlag(flagType) {
+  if (!filtered.length) return;
+  const q = filtered[currentIndex];
+
+  if (!state.flags[q.id]) {
+    state.flags[q.id] = { review: false, broken: false };
+  }
+
+  state.flags[q.id][flagType] = !state.flags[q.id][flagType];
+
+  // Clean up if both flags are false
+  if (!state.flags[q.id].review && !state.flags[q.id].broken) {
+    delete state.flags[q.id];
+  }
+
+  persistState();
+  render();
+  buildQuestionGrid();
+}
+
 function decorateOptions(q, chosen) {
   const chosenSet = new Set(chosen);
   const correctSet = new Set(q.answers);
@@ -425,6 +482,7 @@ function loadState() {
       attempts: parsed.attempts || {},
       stats: parsed.stats || { attempted: 0, correct: 0, incorrect: 0, streak: 0, totalAttempts: 0 },
       perTest: parsed.perTest || {},
+      flags: parsed.flags || {},
     };
   } catch (e) {
     console.warn('Resetting progress due to parse error', e);
@@ -433,7 +491,7 @@ function loadState() {
 }
 
 function freshState() {
-  return { attempts: {}, stats: { attempted: 0, correct: 0, incorrect: 0, streak: 0, totalAttempts: 0 }, perTest: {} };
+  return { attempts: {}, stats: { attempted: 0, correct: 0, incorrect: 0, streak: 0, totalAttempts: 0 }, perTest: {}, flags: {} };
 }
 
 function persistState() {
@@ -503,6 +561,74 @@ function exportMistakesCSV() {
   const link = document.createElement('a');
   link.href = url;
   link.download = `snowflake-mistakes-${new Date().toISOString().split('T')[0]}.csv`;
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
+function exportFlaggedCSV() {
+  const flaggedQuestions = questions.filter((q) => {
+    const flags = state.flags[q.id];
+    return flags && (flags.review || flags.broken);
+  });
+
+  if (flaggedQuestions.length === 0) {
+    alert('No flagged questions to export.');
+    return;
+  }
+
+  const headers = [
+    'number',
+    'flag_type',
+    'question',
+    'option_1',
+    'option_2',
+    'option_3',
+    'option_4',
+    'option_5',
+    'option_6',
+    'correct_answers',
+    'explanation',
+    'reference_url',
+    'source_file',
+    'test_number',
+  ];
+
+  const rows = flaggedQuestions.map((q) => {
+    const opts = ['', '', '', '', '', ''];
+    q.options.forEach((opt) => {
+      opts[opt.id - 1] = opt.value;
+    });
+
+    const flags = state.flags[q.id];
+    const flagTypes = [];
+    if (flags.review) flagTypes.push('review');
+    if (flags.broken) flagTypes.push('needs_fix');
+    const flagType = flagTypes.join(' + ');
+
+    return [
+      q.number,
+      flagType,
+      escapeCSV(q.question),
+      escapeCSV(opts[0]),
+      escapeCSV(opts[1]),
+      escapeCSV(opts[2]),
+      escapeCSV(opts[3]),
+      escapeCSV(opts[4]),
+      escapeCSV(opts[5]),
+      q.answers.join(', '),
+      escapeCSV(q.explanation),
+      q.reference,
+      q.source,
+      q.testNumber ?? '',
+    ];
+  });
+
+  const csvContent = [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `snowflake-flagged-${new Date().toISOString().split('T')[0]}.csv`;
   link.click();
   URL.revokeObjectURL(url);
 }

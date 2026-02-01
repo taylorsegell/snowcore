@@ -204,6 +204,7 @@ main { max-width: 920px; margin: 24px auto; display: flex; flex-direction: colum
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid var(--border-muted);
   box-shadow: none;
+  position: relative;
 }
 
 .question-grid button:hover {
@@ -225,6 +226,40 @@ main { max-width: 920px; margin: 24px auto; display: flex; flex-direction: colum
 .question-grid button.active {
   box-shadow: 0 0 0 2px var(--accent);
   transform: scale(1.05);
+}
+
+.question-grid button.flagged-review::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 6px;
+  height: 6px;
+  background: var(--accent);
+  border-radius: 50%;
+  box-shadow: 0 0 4px rgba(116, 193, 194, 0.6);
+}
+
+.question-grid button.flagged-broken::before {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 6px;
+  height: 6px;
+  background: var(--error);
+  border-radius: 50%;
+  box-shadow: 0 0 4px rgba(248, 113, 113, 0.6);
+}
+
+.question-grid button.flagged-review.flagged-broken::after {
+  top: 2px;
+  right: 2px;
+}
+
+.question-grid button.flagged-review.flagged-broken::before {
+  top: 2px;
+  left: 2px;
 }
 
 .back-btn {
@@ -283,6 +318,59 @@ main { max-width: 920px; margin: 24px auto; display: flex; flex-direction: colum
 .option.incorrect { border-color: rgba(248, 113, 113, 0.6); background: rgba(248, 113, 113, 0.08); }
 
 .actions { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+
+.flag-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border-muted);
+}
+
+.flag-btn {
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--muted);
+  border: 1px solid var(--border-muted);
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.flag-btn:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: var(--accent);
+  transform: translateY(0);
+}
+
+.flag-btn.active {
+  background: rgba(168, 85, 247, 0.15);
+  border-color: var(--accent-2);
+  color: var(--accent-2);
+}
+
+.flag-btn svg {
+  flex-shrink: 0;
+}
+
+#flag-review.active {
+  background: rgba(116, 193, 194, 0.15);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+#flag-broken.active {
+  background: rgba(248, 113, 113, 0.15);
+  border-color: var(--error);
+  color: var(--error);
+}
 
 .feedback { min-height: 22px; font-weight: 700; }
 .feedback.ok { color: var(--success); }
