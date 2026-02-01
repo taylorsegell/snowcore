@@ -1,4 +1,5 @@
 const STORAGE_KEY = 'snowflake-practice-progress-v1';
+const COLLAPSE_STATE_KEY = 'snowflake-grid-collapse-state';
 
 const els = {
   landing: document.getElementById('landing'),
@@ -6,6 +7,9 @@ const els = {
   quizView: document.getElementById('quiz-view'),
   backToLanding: document.getElementById('back-to-landing'),
   questionGrid: document.getElementById('question-grid'),
+  questionOverviewCard: document.querySelector('.question-overview-card'),
+  questionOverviewHeader: document.getElementById('question-overview-header'),
+  gridCollapseToggle: document.getElementById('grid-collapse-toggle'),
   testFilter: document.getElementById('test-filter'),
   reviewToggle: document.getElementById('review-toggle'),
   exportMistakes: document.getElementById('export-mistakes'),
@@ -126,6 +130,50 @@ function wireEvents() {
   els.next.addEventListener('click', () => move(1));
   els.check.addEventListener('click', gradeCurrent);
   els.retry.addEventListener('click', retryCurrent);
+
+  // Question grid collapse/expand
+  if (els.questionOverviewHeader && els.gridCollapseToggle) {
+    const toggleGridCollapse = (e) => {
+      e?.stopPropagation();
+      els.questionOverviewCard.classList.toggle('collapsed');
+      saveCollapseState();
+    };
+
+    els.questionOverviewHeader.addEventListener('click', toggleGridCollapse);
+    els.gridCollapseToggle.addEventListener('click', toggleGridCollapse);
+  }
+
+  // Initialize collapse state
+  initializeCollapseState();
+}
+
+function initializeCollapseState() {
+  if (!els.questionOverviewCard) return;
+
+  try {
+    const savedState = localStorage.getItem(COLLAPSE_STATE_KEY);
+    const isMobile = window.innerWidth <= 720;
+
+    if (savedState !== null) {
+      // Use saved state if available
+      const isCollapsed = savedState === 'true';
+      els.questionOverviewCard.classList.toggle('collapsed', isCollapsed);
+    } else {
+      // Default to collapsed on mobile, expanded on desktop
+      els.questionOverviewCard.classList.toggle('collapsed', isMobile);
+    }
+  } catch (e) {
+    console.warn('Failed to load collapse state', e);
+  }
+}
+
+function saveCollapseState() {
+  try {
+    const isCollapsed = els.questionOverviewCard.classList.contains('collapsed');
+    localStorage.setItem(COLLAPSE_STATE_KEY, isCollapsed.toString());
+  } catch (e) {
+    console.warn('Failed to save collapse state', e);
+  }
 }
 
 function startQuiz() {
@@ -135,6 +183,7 @@ function startQuiz() {
   applyFilter();
   buildQuestionGrid();
   render();
+  initializeCollapseState();
 }
 
 function backToLanding() {

@@ -362,9 +362,84 @@ main { max-width: 920px; margin: 24px auto; display: flex; flex-direction: colum
 
 .muted { color: var(--muted); font-size: 14px; margin-top: 4px; }
 
+/* Collapsible question overview styles */
+.question-overview-card .card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.collapsible-header {
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.2s ease;
+  padding: 8px;
+  margin: -8px;
+  border-radius: 8px;
+}
+
+.collapsible-header:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.collapse-toggle {
+  flex-shrink: 0;
+  background: transparent;
+  border: none;
+  color: var(--accent);
+  padding: 4px;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+  box-shadow: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+}
+
+.collapse-toggle:hover {
+  background: rgba(116, 193, 194, 0.1);
+  transform: translateY(0);
+}
+
+.question-overview-card.collapsed .collapse-toggle {
+  transform: rotate(-90deg);
+}
+
+.question-grid {
+  max-height: 1000px;
+  overflow: hidden;
+  transition: max-height 0.3s ease, opacity 0.3s ease, margin-top 0.3s ease;
+  opacity: 1;
+}
+
+.question-overview-card.collapsed .question-grid {
+  max-height: 0;
+  opacity: 0;
+  margin-top: 0;
+}
+
 @media (max-width: 720px) {
   body { padding: 16px; }
   .topbar { flex-direction: column; align-items: flex-start; }
   .controls { width: 100%; flex-wrap: wrap; }
   .actions { justify-content: space-between; }
+
+  /* Collapse question overview by default on mobile */
+  .question-overview-card {
+    position: relative;
+  }
+
+  .question-overview-card.collapsed .question-grid {
+    max-height: 0;
+    opacity: 0;
+    margin-top: 0;
+  }
+
+  .collapse-toggle {
+    display: flex;
+  }
 }

@@ -44,10 +44,17 @@
       <div><span id="stat-total-attempts">0</span><small>Total Attempts</small></div>
     </section>
 
-    <section class="card">
-      <div class="card-top">
-        <div class="badge">Question Overview</div>
-        <div class="muted">Click to jump • Green = correct first try • Red = incorrect</div>
+    <section class="card question-overview-card">
+      <div class="card-top collapsible-header" id="question-overview-header">
+        <div>
+          <div class="badge">Question Overview</div>
+          <div class="muted">Click to jump • Green = correct first try • Red = incorrect</div>
+        </div>
+        <button class="collapse-toggle" id="grid-collapse-toggle" aria-label="Toggle question grid">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/>
+          </svg>
+        </button>
       </div>
       <div id="question-grid" class="question-grid"></div>
     </section>
